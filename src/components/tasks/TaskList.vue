@@ -1,9 +1,9 @@
 <template>
     <div>
 
-    <ul v-if="!isError" class="bg-white dark:bg-slate-800 shadow overflow-hidden sm:rounded-md max-w-sm mx-auto mt-16">
+    <ul v-if="!todoStore.isError" class="bg-white dark:bg-slate-800 shadow overflow-hidden sm:rounded-md max-w-sm mx-auto mt-16">
         <li 
-            v-if="!isLoading" 
+            v-if="!todoStore.isLoading" 
             v-for="item in toDoList"
             :key="item.id"
         >
@@ -36,6 +36,7 @@ import Error from '../partials/alerts/Error.vue';
 import Skeleton from '../partials/Skeleton.vue';
 import { getToDoList } from '../../services/toDoRequests';
 import AddTodoForm from '../partials/forms/AddTodoForm.vue';
+import { useTodoStore } from '../../store/todoStore';
 
 const props = defineProps({
     selectedOption: {
@@ -47,9 +48,8 @@ const props = defineProps({
     }
 })
 
-const toDoList = ref([]);
-const isLoading = ref(true);
-const isError = ref(false);
+const todoStore = useTodoStore();
+const toDoList = computed(() => todoStore.toDoList)
 let searchTimeout;
 
 const createTodo = (todo) => {
@@ -57,18 +57,6 @@ const createTodo = (todo) => {
         todo: todo,
         completed: false
     })
-}
-
-const getList = async () => {
-    try {
-        isLoading.value = true;
-        const res = await getToDoList();
-        toDoList.value = res;
-        isLoading.value = false;
-    } catch(e) {
-        isError.value = true;
-        console.log(e);
-    }
 }
 
 const reload = () => {
@@ -113,6 +101,6 @@ watch(() => props.searchQuery, () => {
 })
 
 onMounted(() => {
-    getList();
+    todoStore.getList();
 })
 </script>
